@@ -5,14 +5,14 @@
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
 
-<title>Javascript Jupiter</title>
+<title>JavaScript Jupiter</title>
 
 <style type="text/css">
 div#jupframe {
   background: black;
   color: white;
   position: relative;
-  width: 99%;
+  width: 800px;
   height: 100px;
 }
 
@@ -31,10 +31,14 @@ div#jupframe {
 
 #upcoming { background: #fffcf5; border: 1px inset; padding: 5px;  }
 
+#positions {color: black; float: right; width: 250px; margin: 5px; padding: 5px; background-color: rgba(188, 211, 246, 1) }
+
+#positions td {font-size: small}
+
 /* I can't find any way to style an input button by name --
  * it has to have an id as well as a name.
- */
 input[type=button]#now { margin-left: 3em; }
+ */
 
 </style>
 
@@ -44,10 +48,12 @@ input[type=button]#now { margin-left: 3em; }
 <!-- Code specific to displaying on this page: -->
 <script type="text/javascript">
 function screenWidth() {
+/****
   if (window.innerWidth != null)
     return window.innerWidth;
   if (document.documentElement.clientWidth)
     return document.documentElement.clientWidth;
+***/
   return 800;
 }
 
@@ -88,6 +94,12 @@ function updateDate(newdate)
 }
 
 function addHours(hrs) {
+  // Step forward some number of hours.
+  // If no number of hours is input, read it from the hourstep field
+  if (!hrs) {
+      var hrs = document.getElementById("hourstep").value;
+    }
+
   var d = jup.getDate();
   d.setTime(d.getTime() + 60 * 60 * hrs * 1000);
   updateDate(d);
@@ -134,18 +146,6 @@ function toggleAnimation() {
   }
 }
 
-function setHemisphere(hemisphere)
-{
-  if (hemisphere == "northern")
-  {
-    document.getElementById("jupframe").removeAttribute("style");
-  }
-  else
-  {
-    document.getElementById("jupframe").setAttribute("style", "transform: rotate(180deg)");
-  }
-}
-
 function drawJupiter(jup, date) {
   busy = document.getElementById("recalculating")
   busy.style.visibility = "visible";
@@ -156,7 +156,7 @@ function drawJupiter(jup, date) {
   var halfwidth = width/2;
   var height = 100;
   var halfheight = height/2;
-  var jupRadius = 19;
+  var jupRadius = 10;
   var spotWidth = 27 * jupRadius / 30;
   var spotHeight = 13 * jupRadius / 30;
   
@@ -224,6 +224,7 @@ function drawJupiter(jup, date) {
     img = document.getElementById("moon" + whichmoon);
     label = document.getElementById("label" + whichmoon);
     eclipselabel = document.getElementById("elabel" + whichmoon);
+    
     if (moondata.eclipse) {
       var x = moondata.moonx * jupRadius + halfwidth;
       placeImage(eclipselabel, x);
@@ -231,6 +232,12 @@ function drawJupiter(jup, date) {
         img.style.visibility = "hidden";
       if (label)
         label.style.visibility = "hidden";
+
+      // Make sure label indicates invisible
+      position = document.getElementById("Position" + whichmoon);
+      var posstr = "Not visible";
+      position.innerHTML = posstr;
+      
     }
     else if (img && !isNaN(moondata.moonx) && !isNaN(moondata.moony)) {
       img.setAttribute("src", "borderedmoon.png");
@@ -247,6 +254,20 @@ function drawJupiter(jup, date) {
 
       if (eclipselabel)
         eclipselabel.style.visibility = "hidden";
+        
+      // Print out the position
+      position = document.getElementById("Position" + whichmoon);
+      if (moondata.moonx>0)
+      {
+	     var posstr = (0.5*moondata.moonx).toFixed(2);	     
+	     position.innerHTML = posstr.concat(" JD West");	  
+       }
+      else
+      {
+	     var posstr = (-0.5*moondata.moonx).toFixed(2);
+	     position.innerHTML = posstr.concat(" JD East");	  
+	  }
+      
     }
     else {
       if (img)
@@ -255,6 +276,11 @@ function drawJupiter(jup, date) {
         label.style.visibility = "hidden";
       if (eclipselabel)
         eclipselabel.style.visibility = "hidden";
+        
+      // Make sure label indicates invisible
+      position = document.getElementById("Position" + whichmoon);
+      var posstr = "Not visible";
+      position.innerHTML = posstr;
     }
   }
 
@@ -276,25 +302,25 @@ function predictUpcoming()
 </script>
 </head>
 
-<body>
-<h1>Javascript Jupiter</h1>
-
-<p>
-Here are the four bright "Galilean" moons of Jupiter --
-Io, Europa, Ganymede and Callisto -- and their shadows.
-It also shows the position of Jupiter's "great red spot" (GRS).
-
-<p>
-North is up; west is right (binocular/Newtonian view, not refractor).
+<body style="width: 800px">
+<h1>JavaScript Jupiter</h1>
 
 <noscript>
 <p>
 <b>
-The moon positions are set using Javascript, which is disabled
+<font color="#F00">The moon positions are set using JavaScript, which is disabled
 in your browser. You'll need to turn it back on if you want to see
-the current position of Jupiter's moons.
+the current position of Jupiter's moons.</font>
 </b>
 </noscript>
+
+<p>
+Here are the four bright "Galilean" moons of Jupiter --
+Io, Europa, Ganymede and Callisto -- and their shadows.
+
+<p>
+North is up; west is right (binocular/Newtonian view, not refractor).
+
 
 <div id="jupframe">
 <img id="jupiter" src="smalljup.png">
@@ -319,48 +345,58 @@ the current position of Jupiter's moons.
 <span id="elabel1" class="eclipselabel">E</span>
 <span id="elabel2" class="eclipselabel">G</span>
 <span id="elabel3" class="eclipselabel">C</span>
-<span id="grslabel">GRS</span>
+<!-- <span id="grslabel">GRS</span> -->
+
+</div>
+<div id="positions"><strong>Positions for Jupiter's Moons:</strong>
+	<table>
+		<tr><td align="right"><strong>Io's Position:</strong></td><td><span id="Position0"></span></td></tr>
+		<tr><td align="right"><strong>Europa's Position:</strong></td><td><span id="Position1"></span></td></tr>
+		<tr><td align="right"><strong>Ganymede's Position:</strong></td><td><span id="Position2"></span></td></tr>
+		<tr><td align="right"><strong>Callisto's Position:</strong></td><td><span id="Position3"></span></td></tr>
+	</table>
 </div>
 
 <p>
+
 <!-- Don't wrap these in a form -- it keeps the dates from working
      when you hit enter. -->
-Or you can set a date explicitly:
-<input id="datefield" type="datetime" onChange="setDate(); return false;"
- size=40>
-<input type="button" name="changeDate" value="Recalculate" onClick="setDate();">
-<span id="recalculating"><i>Recalculating ...</i></span>
-<p>
+<!---
 <input type="button" name="nextDay" value="-1 day" onClick="addHours(-24);">
 <input type="button" name="nextHour" value="-1 hour" onClick="addHours(-1);">
-<input type="button" name="nextHour" value="-5 min" onClick="addHours(-1/12);">
-<input type="button" name="nextHour" value="+5 min" onClick="addHours(1/12);">
-<input type="button" name="nextHour" value="+1 hour" onClick="addHours(1);">
-<input type="button" name="nextDay" value="+1 day" onClick="addHours(24);">
-<input type="button" name="now" id="now" value="* Now *"
-        onClick="drawJupiter(jup, new Date()); predictUpcoming(); return true">
+<input type="button" name="nextMin" value="-5 min" onClick="addHours(-1/12);"> -->
+<strong>Date of Simulation:</strong>
+<input id="datefield" type="datetime" onChange="setDate(); return false;"
+ size=40><br/>
+ <input type="button" name="now" id="now" value="* Set Date to 'Now' *" onClick="drawJupiter(jup, new Date()); return true"> or manually enter date above and then hit 
+<input type="button" name="changeDate" value="Recalculate" onClick="setDate();">.
+<span id="recalculating"><!--- <i>Recalculating ...</i>--></span> <br/><br/>
+
+
+Or you can use the following controls to step forward in time<br/>
+Step size: <input id="hourstep" type="hourstep" value="1" size=6> hours <input type="button" name="stepForward" value="Step Forward" onClick="addHours();"><br/>
+
+<!--
+<input type="button" name="nextHour" value="Step" onClick="addHours(1);">
+<input type="button" name="nextDay" value="+1 day" onClick="addHours(24);"><br/> -->
 <p>
-<input type="button" name="animate" value="Animate"
-       onClick="toggleAnimation();">
+Or switch to an animated display:<br/>
+<input type="button" name="animate" value="Animate" onClick="toggleAnimation();">
 <input type="button" name="faster" value="faster" onClick="animateFaster(20);">
 <input type="button" name="slower" value="slower" onClick="animateFaster(-20);">
-<span id="animDelay">Delay: 100 milliseconds</span>
+<!-- <span id="animDelay">Delay: 100 milliseconds</span> -->
 
-<p>
-  Viewing hemisphere:
-  <input type="radio" name="hemisphere" value="northern" onClick="setHemisphere('northern')" checked>Northern
-  <input type="radio" name="hemisphere" value="southern" onClick="setHemisphere('southern')">Southern
-</p>
 
-<p>
+<!--- <p>
 Show events for
-<input id="upcoming-hrs" type="text" value="8" size=4
+<input id="upcoming-hrs" type="text" value="8" size=4 
  onChange="predictUpcoming();">
 hours.
 <input type="button" name="predict" value="Predict"
        onClick="predictUpcoming();">
 <p>
-<pre id="upcoming"></pre>
+<pre id="upcoming"></pre> --->
+
 
 <script type="text/javascript">
 
@@ -399,47 +435,10 @@ updateDate(date);
 
 <hr>
 
-<h3>About Javascript Jupiter</h3>
+<h3>About JavaScript Jupiter</h3>
 
-<p>
-<b>New for 2013!</b> Now you can predict future events, see eclipses,
-and I improved the graphics so it's more obvious when moons are emerging
-from behind Jupiter. Please report any bugs you find.
-
-<p>
-Times are approximate. There are lots of different models for Jupiter's
-moons, and they all seem to give slightly different results, especially
-for shadow events and eclipses. Start observing ten or fifteen 
-minutes early if you want to be sure of catching something.
-
-<p>
-This is a re-implementation of my older
-<a href="/jupiter.html">Java Jupiter</a> page
-using HTML, CSS and Javascript (and nicer graphics).
-It is Copyright &copy; 2000 - 2013 by Akkana Peck,
-licensed under the GNU Public License v.2.
-Feel free to share it or modify it! If you do, I'd appreciate hearing
-about it, and a link back to my site.
-
-<p>
-I use this app on Android with the help of my
-<a href="http://shallowsky.com/software/android/WebClient/">WebClient</a>
-wrapper app.
-<br>
-For older Java phones,
-Miguel Moreto has adapted this code for a neat mobile phone app called
-<a href="http://code.google.com/p/mobilejupiter/">Mobile Jupiter</a>.
-
-<hr>
-<a href="https://github.com/akkana/scripts/tree/master/jsjupiter">Javascript
-Jupiter on GitHub</a> |
-<a href="/software/">Akkana's other software</a>
-<br>
-<a href="http://shallowsky.com/blog/tags/astronomy/">Articles tagged "astronomy" on my blog, "Shallow Thoughts"
-<br>
-<a href="/astro.html">Akkana's Astronomy Page</a> |
-<a href="/">Shallow Sky home</a>
-
+This is a re-implementation and modification of the <a href="http://www.shallowsky.com/jupiter/">JavaScript
+Jupiter</a> page originally developed by <a href="http://shallowsky.com/">Ms. Akkana Peck</a>.  Thanks to her for making the original version of this code available as open source software under the GNU Public License v.2 and available for download via <a href="https://github.com/akkana/scripts/tree/master/jsjupiter">GitHub</a>.
 
 </body>
 </html>
